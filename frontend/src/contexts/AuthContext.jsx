@@ -1,11 +1,11 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect } from "react";
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -16,30 +16,30 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Vérifier si l'utilisateur est déjà connecté
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
-    
+    const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
+
     if (token && userStr) {
       try {
         setUser(JSON.parse(userStr));
       } catch (e) {
-        console.error('Erreur parsing user:', e);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        console.error("Erreur parsing user:", e);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
       }
     }
     setLoading(false);
   }, []);
 
   const login = (userData, token) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
   };
 
@@ -47,14 +47,10 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     login,
-    logout
+    logout,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export default AuthContext;
