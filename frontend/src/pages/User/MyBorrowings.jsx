@@ -7,10 +7,12 @@ const MyBorrowings = () => {
   const [penalties, setPenalties] = useState(0);
   const navigate = useNavigate();
   
+  // Récupération des informations de l'utilisateur stockées lors de la connexion
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
 
   useEffect(() => {
+    // Redirection vers la page de connexion si l'utilisateur n'est pas identifié
     if (!user) {
       navigate('/login');
       return;
@@ -18,25 +20,33 @@ const MyBorrowings = () => {
     loadBorrowings();
   }, []);
 
+  // Fonction pour charger la liste des emprunts depuis l'API
   const loadBorrowings = async () => {
     try {
       const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:5000/api/borrowings/my-borrowings', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await res.json();
-      setBorrowings(data.data || []);
       
-      // Calculer les pénalités
-      const totalPenalties = (data.data || []).reduce((sum, b) => sum + (b.penalty?.amount || 0), 0);
+      const result = await res.json();
+      
+      // Gestion de la structure des données : accepte soit un tableau direct, soit result.data
+      const actualData = Array.isArray(result) ? result : (result.data || []);
+      
+      setBorrowings(actualData);
+      
+      // Calcul du montant total des pénalités accumulées
+      const totalPenalties = actualData.reduce((sum, b) => sum + (b.penalty?.amount || 0), 0);
       setPenalties(totalPenalties);
+      
     } catch (err) {
-      console.error(err);
+      console.error("Erreur lors de la récupération des données :", err);
     } finally {
       setLoading(false);
     }
   };
 
+  // Fonction pour retourner un livre
   const handleReturn = async (borrowingId) => {
     try {
       const token = localStorage.getItem('token');
@@ -45,15 +55,16 @@ const MyBorrowings = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (data.success) {
-        alert('📤 Livre retourné !');
-        loadBorrowings();
+      if (data.success || res.ok) {
+        alert('📤 Livre retourné avec succès !');
+        loadBorrowings(); // Recharger la liste après l'action
       }
     } catch (err) {
-      alert('Erreur');
+      alert('Erreur lors du retour du livre');
     }
   };
 
+  // Fonction pour prolonger la durée d'un emprunt
   const handleRenew = async (borrowingId) => {
     try {
       const token = localStorage.getItem('token');
@@ -62,93 +73,96 @@ const MyBorrowings = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (data.success) {
-        alert('🔄 Emprunt prolongé !');
-        loadBorrowings();
+      if (data.success || res.ok) {
+        alert('🔄 Emprunt prolongé avec succès !');
+        loadBorrowings(); // Recharger la liste après l'action
       }
     } catch (err) {
-      alert('Erreur');
+      alert('Erreur lors du renouvellement');
     }
   };
 
-  if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Chargement...</div>;
+  if (loading) return <div className="p-8 text-center text-gray-600">Chargement de vos emprunts...</div>;
+
+  // Filtrage des emprunts pour les compteurs du tableau de bord
+  // On inclut 'pending' pour que l'utilisateur voie ses demandes en attente
+  const activeAndPending = borrowings.filter(b => b.status === 'active' || b.status === 'pending');
+  const overdueBorrowings = borrowings.filter(b => b.status === 'overdue');
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f3f4f6', padding: '2rem' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <h1 style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>📋 Mes emprunts</h1>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 flex items-center gap-2">
+          <span>📋</span> Mes emprunts
+        </h1>
 
-        {/* Résumé */}
-        <div style={{ background: 'white', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-          <div>
-            <strong>Emprunts en cours:</strong>
-            <p style={{ fontSize: '2rem', color: '#2563eb' }}>{borrowings.filter(b => b.status === 'active').length}</p>
+        {/* Section Résumé : Affiche les compteurs d'emprunts et pénalités */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Emprunts en cours</p>
+            <p className="text-4xl font-bold text-blue-600 mt-2">{activeAndPending.length}</p>
           </div>
-          <div>
-            <strong>En retard:</strong>
-            <p style={{ fontSize: '2rem', color: '#dc2626' }}>{borrowings.filter(b => b.status === 'overdue').length}</p>
+          
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">En retard</p>
+            <p className="text-4xl font-bold text-red-500 mt-2">{overdueBorrowings.length}</p>
           </div>
-          <div>
-            <strong>Pénalités totales:</strong>
-            <p style={{ fontSize: '2rem', color: '#d97706' }}>{penalties}€</p>
+          
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Pénalités totales</p>
+            <p className="text-4xl font-bold text-amber-600 mt-2">{penalties}€</p>
           </div>
         </div>
 
-        {/* Liste des emprunts */}
+        {/* Affichage de la liste ou d'un message si vide */}
         {borrowings.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#6b7280' }}>Aucun emprunt</p>
+          <div className="bg-white p-12 rounded-xl border-2 border-dashed border-gray-200 text-center">
+            <p className="text-gray-400 text-lg">Vous n'avez aucun emprunt pour le moment.</p>
+          </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="space-y-4">
             {borrowings.map(b => {
-              const isOverdue = new Date() > new Date(b.dueDate) && b.status !== 'returned';
-              const daysLeft = Math.ceil((new Date(b.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+              const dueDate = new Date(b.dueDate);
+              const isOverdue = new Date() > dueDate && b.status !== 'returned';
+              const daysLeft = Math.ceil((dueDate - new Date()) / (1000 * 60 * 60 * 24));
               
               return (
-                <div key={b._id} style={{ background: 'white', borderRadius: '8px', padding: '1.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{b.book?.title}</h3>
-                      <p style={{ color: '#6b7280' }}>par {b.book?.author}</p>
-                      
-                      <div style={{ marginTop: '1rem' }}>
-                        <p>Emprunté le: {new Date(b.borrowDate).toLocaleDateString()}</p>
-                        <p style={{ color: isOverdue ? '#dc2626' : '#059669', fontWeight: 'bold' }}>
-                          {b.status === 'returned' ? 'Retourné' : isOverdue ? `EN RETARD (${-daysLeft} jours)` : `Retour prévu: ${new Date(b.dueDate).toLocaleDateString()} (${daysLeft} jours restants)`}
-                        </p>
-                        {b.penalty?.amount > 0 && (
-                          <p style={{ color: '#d97706' }}>Pénalité: {b.penalty.amount}€</p>
-                        )}
-                      </div>
+                <div key={b._id} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900">{b.book?.title || 'Titre inconnu'}</h3>
+                    <p className="text-gray-500">par {b.book?.author || 'Auteur inconnu'}</p>
+                    
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-sm">
+                      <p><span className="text-gray-400">Date d'emprunt :</span> {new Date(b.borrowDate).toLocaleDateString()}</p>
+                      <p className={`font-semibold ${isOverdue ? 'text-red-600' : 'text-green-600'}`}>
+                        {b.status === 'returned' ? '✅ Retourné' : 
+                         isOverdue ? `❌ EN RETARD (${Math.abs(daysLeft)} j)` : 
+                         `📅 Retour le : ${dueDate.toLocaleDateString()} (${daysLeft} j)`}
+                      </p>
                     </div>
+                  </div>
 
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                      {b.status !== 'returned' && (
-                        <>
-                          <button onClick={() => handleReturn(b._id)} style={{
-                            background: '#059669',
-                            color: 'white',
-                            padding: '0.5rem 1rem',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                          }}>
-                            📤 Retourner
+                  {/* Boutons d'actions : Retourner ou Prolonger */}
+                  <div className="flex gap-2">
+                    {b.status !== 'returned' && (
+                      <>
+                        <button 
+                          onClick={() => handleReturn(b._id)}
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
+                        >
+                          Retourner
+                        </button>
+                        {/* On ne peut prolonger que si le livre n'est pas en retard et limite de 2 fois */}
+                        {!isOverdue && (b.renewalCount || 0) < 2 && (
+                          <button 
+                            onClick={() => handleRenew(b._id)}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                          >
+                            Prolonger
                           </button>
-                          {!isOverdue && b.renewalCount < 2 && (
-                            <button onClick={() => handleRenew(b._id)} style={{
-                              background: '#2563eb',
-                              color: 'white',
-                              padding: '0.5rem 1rem',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer'
-                            }}>
-                              🔄 Prolonger
-                            </button>
-                          )}
-                        </>
-                      )}
-                    </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               );
