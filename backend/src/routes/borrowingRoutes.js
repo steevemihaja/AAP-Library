@@ -1,21 +1,29 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { protect, authorize } = require('../middleware/auth');
-const { validate, borrowingValidation } = require('../middleware/validation');
+const { protect } = require("../middleware/auth");
+
 const {
-    borrowBook,
-    returnBook,
-    renewBook,
-    getMyBorrowings,
-    getOverdueBooks
-} = require('../controllers/borrowingController');
+  borrowBook,
+  getMyBorrowings,
+  returnBook,
+  renewBorrowing,
+  updateNote,
+  getMyWaitingList,
+} = require("../controllers/borrowingController");
 
-router.route('/')
-    .post(protect, validate(borrowingValidation.create), borrowBook);
+const {
+  createReviewFromBorrowing,
+} = require("../controllers/reviewController");
 
-router.get('/my-borrowings', protect, getMyBorrowings);
-router.get('/overdue', protect, authorize('librarian', 'admin'), getOverdueBooks);
-router.put('/:id/return', protect, returnBook);
-router.put('/:id/renew', protect, renewBook);
+// ── Emprunts ─────────────────────────────────────────────────────────────────
+router.post("/", protect, borrowBook);
+router.get("/my-borrowings", protect, getMyBorrowings);
+router.put("/:id/return", protect, returnBook);
+router.put("/:id/renew", protect, renewBorrowing);
+router.put("/:id/note", protect, updateNote);
+router.post("/:id/review", protect, createReviewFromBorrowing);
+
+// ── Liste d'attente ───────────────────────────────────────────────────────────
+router.get("/waitinglist/my-list", protect, getMyWaitingList);
 
 module.exports = router;

@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const fetch = require("node-fetch");
 
 const books = [
   {
@@ -9,9 +9,10 @@ const books = [
     totalCopies: 5,
     availableCopies: 5,
     publishedYear: 1943,
-    description: "Le Petit Prince est une œuvre de langue française, la plus connue d'Antoine de Saint-Exupéry.",
+    description:
+      "Le Petit Prince est une œuvre de langue française, la plus connue d'Antoine de Saint-Exupéry.",
     language: "Français",
-    pages: 96
+    pages: 96,
   },
   {
     title: "1984",
@@ -21,9 +22,10 @@ const books = [
     totalCopies: 3,
     availableCopies: 2,
     publishedYear: 1949,
-    description: "Dans une société totalitaire, Winston Smith lutte contre le Parti unique.",
+    description:
+      "Dans une société totalitaire, Winston Smith lutte contre le Parti unique.",
     language: "Français",
-    pages: 328
+    pages: 328,
   },
   {
     title: "Dune",
@@ -33,9 +35,10 @@ const books = [
     totalCopies: 4,
     availableCopies: 3,
     publishedYear: 1965,
-    description: "Sur la planète désertique Arrakis, Paul Atréides doit survivre.",
+    description:
+      "Sur la planète désertique Arrakis, Paul Atréides doit survivre.",
     language: "Français",
-    pages: 896
+    pages: 896,
   },
   {
     title: "L'Étranger",
@@ -45,9 +48,10 @@ const books = [
     totalCopies: 3,
     availableCopies: 3,
     publishedYear: 1942,
-    description: "Meursault, un homme indifférent, commet un meurtre et est jugé.",
+    description:
+      "Meursault, un homme indifférent, commet un meurtre et est jugé.",
     language: "Français",
-    pages: 192
+    pages: 192,
   },
   {
     title: "Fondation",
@@ -57,47 +61,50 @@ const books = [
     totalCopies: 2,
     availableCopies: 1,
     publishedYear: 1951,
-    description: "Hari Seldon invente la psychohistoire pour sauver la civilisation.",
+    description:
+      "Hari Seldon invente la psychohistoire pour sauver la civilisation.",
     language: "Français",
-    pages: 320
-  }
+    pages: 320,
+  },
 ];
 
 async function addBooks() {
-  console.log('📚 Ajout des livres...\n');
-  
+  console.log("📚 Ajout des livres...\n");
+
   for (const book of books) {
     try {
-      const response = await fetch('http://localhost:5000/api/books', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(book)
+      const response = await fetch("http://localhost:5000/api/books", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(book),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         console.log(`✅ ${book.title} - ${book.author}`);
       } else {
-        console.log(`❌ ${book.title}: ${data.error || 'Erreur inconnue'}`);
+        console.log(`❌ ${book.title}: ${data.error || "Erreur inconnue"}`);
       }
     } catch (err) {
       console.log(`❌ ${book.title}: Erreur de connexion`);
     }
-    
+
     // Petit délai
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  
-  console.log('\n📊 Vérification...');
-  
+
+  console.log("\n📊 Vérification...");
+
   // Vérifier le nombre de livres
   try {
-    const check = await fetch('http://localhost:5000/api/books');
+    const check = await fetch("http://localhost:5000/api/books");
     const data = await check.json();
-    console.log(`✅ Total livres dans la base: ${data.pagination?.totalItems || 0}`);
+    console.log(
+      `✅ Total livres dans la base: ${data.pagination?.totalItems || 0}`,
+    );
   } catch (err) {
-    console.log('❌ Impossible de vérifier');
+    console.log("❌ Impossible de vérifier");
   }
 }
 
