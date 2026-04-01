@@ -231,6 +231,51 @@ const uploadCover = async (req, res, next) => {
   }
 };
 
+// @desc    Get all genres
+// @route   GET /api/books/genres
+// @access  Public
+const getGenres = async (req, res, next) => {
+  try {
+    const genres = [
+      "Fiction",
+      "Non-Fiction",
+      "Science Fiction",
+      "Fantasy",
+      "Mystery",
+      "Thriller",
+      "Romance",
+      "Biography",
+      "History",
+      "Self-Help",
+      "Poetry",
+      "Drama",
+      "Horror",
+      "Adventure",
+      "Children",
+      "Young Adult",
+      "Classic",
+      "Philosophy",
+      "Religion",
+      "Science",
+      "Technology",
+      "Art",
+      "Music",
+      "Travel",
+      "Cooking",
+      "Sports",
+      "Business",
+      "Economics",
+    ];
+
+    res.json({
+      success: true,
+      data: genres,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getBooks,
   getBook,
@@ -238,4 +283,5 @@ module.exports = {
   updateBook,
   deleteBook,
   uploadCover,
+  getGenres,
 };

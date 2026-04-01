@@ -9,6 +9,8 @@ const {
   renewBorrowing,
   updateNote,
   getMyWaitingList,
+  joinWaitingList,
+  leaveWaitingList,
 } = require("../controllers/borrowingController");
 
 const {

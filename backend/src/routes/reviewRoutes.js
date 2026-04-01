@@ -6,6 +6,7 @@ const {
   updateReview,
   deleteReview,
   markHelpful,
+  getBookReviews,
 } = require("../controllers/reviewController");
 
 router.route("/").post(protect, createReview);
@@ -13,5 +14,7 @@ router.route("/").post(protect, createReview);
 router.route("/:id").put(protect, updateReview).delete(protect, deleteReview);
 
 router.post("/:id/helpful", protect, markHelpful);
+
+router.get("/book/:bookId", getBookReviews);
 
 module.exports = router;

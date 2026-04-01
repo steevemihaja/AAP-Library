@@ -161,12 +161,10 @@ const updateReview = async (req, res, next) => {
     }
 
     if (review.user.toString() !== req.user.id && req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          error: "Not authorized to update this review",
-        });
+      return res.status(403).json({
+        success: false,
+        error: "Not authorized to update this review",
+      });
     }
 
     if (req.body.rating) review.rating = req.body.rating;
@@ -212,12 +210,10 @@ const deleteReview = async (req, res, next) => {
     }
 
     if (review.user.toString() !== req.user.id && req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          error: "Not authorized to delete this review",
-        });
+      return res.status(403).json({
+        success: false,
+        error: "Not authorized to delete this review",
+      });
     }
 
     await review.deleteOne(); // ← .remove() est déprécié
@@ -265,10 +261,29 @@ const markHelpful = async (req, res, next) => {
   }
 };
 
+// @desc    Get reviews for a book
+// @route   GET /api/reviews/book/:bookId
+// @access  Public
+const getBookReviews = async (req, res, next) => {
+  try {
+    const reviews = await Review.find({
+      book: req.params.bookId,
+      status: "approved",
+    })
+      .populate("user", "firstName lastName profilePicture")
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, data: reviews });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createReview,
   createReviewFromBorrowing,
   updateReview,
   deleteReview,
   markHelpful,
+  getBookReviews,
 };

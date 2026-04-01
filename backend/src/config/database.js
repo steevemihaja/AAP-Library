@@ -8,7 +8,7 @@ const connectDB = async () => {
     });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
 
-    // ✅ Création automatique du compte admin par défaut
+    // Création automatique du compte admin par défaut
     const User = require("../models/User");
 
     const adminExists = await User.findOne({ email: "admin@library.com" });
@@ -21,7 +21,7 @@ const connectDB = async () => {
         role: "admin",
         active: true,
       });
-      console.log("✅ Compte admin créé : admin@library.com / admin123");
+      console.log("Compte admin créé : admin@library.com / admin123");
     }
   } catch (error) {
     console.error("Database connection error:", error);

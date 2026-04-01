@@ -15,6 +15,7 @@ const authRoutes = require("./routes/authRoutes");
 const bookRoutes = require("./routes/bookRoutes");
 const borrowingRoutes = require("./routes/borrowingRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
+const waitingListRoutes = require("./routes/waitingListRoutes");
 
 // Import middleware
 const errorHandler = require("./middleware/error");
@@ -60,6 +61,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/borrowings", borrowingRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/waiting-list", waitingListRoutes);
 
 // Health check
 app.get("/health", (req, res) => {

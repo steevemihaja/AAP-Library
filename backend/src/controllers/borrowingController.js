@@ -272,6 +272,81 @@ const getMyWaitingList = async (req, res, next) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Join waiting list
+// @route   POST /api/waiting-list
+// @access  Private
+// ─────────────────────────────────────────────────────────────────────────────
+const joinWaitingList = async (req, res, next) => {
+  try {
+    const { bookId } = req.body;
+    const WaitingList = require("../models/WaitingList");
+
+    // Check if user already in waiting list
+    const existing = await WaitingList.findOne({
+      user: req.user.id,
+      book: bookId,
+      status: "waiting",
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        error: "You are already on the waiting list for this book",
+      });
+    }
+
+    // Get position
+    const lastPosition = await WaitingList.findOne({
+      book: bookId,
+      status: "waiting",
+    }).sort({ position: -1 });
+    const position = lastPosition ? lastPosition.position + 1 : 1;
+
+    const waitingEntry = await WaitingList.create({
+      user: req.user.id,
+      book: bookId,
+      position,
+      status: "waiting",
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+    });
+
+    await waitingEntry.populate("book", "title author");
+
+    res.status(201).json({ success: true, data: waitingEntry });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Leave waiting list
+// @route   DELETE /api/waiting-list/:bookId
+// @access  Private
+// ─────────────────────────────────────────────────────────────────────────────
+const leaveWaitingList = async (req, res, next) => {
+  try {
+    const { bookId } = req.params;
+    const WaitingList = require("../models/WaitingList");
+
+    const result = await WaitingList.findOneAndDelete({
+      user: req.user.id,
+      book: bookId,
+    });
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        error: "Waiting list entry not found",
+      });
+    }
+
+    res.json({ success: true, message: "Removed from waiting list" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getMyBorrowings,
   borrowBook,
@@ -279,4 +354,6 @@ module.exports = {
   renewBorrowing,
   updateNote,
   getMyWaitingList,
+  joinWaitingList,
+  leaveWaitingList,
 };
