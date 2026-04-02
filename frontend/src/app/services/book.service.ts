@@ -88,7 +88,7 @@ export class BookService {
     });
   }
 
-  // Get available genres (extraits des livres disponibles)
+  // Get available genres
   getGenres(): Observable<any> {
     return this.getBooks().pipe(
       map((response) => {
@@ -111,9 +111,43 @@ export class BookService {
     });
   }
 
-  // Return book
-  returnBook(borrowingId: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/borrowings/${borrowingId}/return`, {});
+  // Return book (avec body optionnel pour condition et returnDate)
+  returnBook(
+    borrowingId: string,
+    body: { condition?: string; returnDate?: string } = {},
+  ): Observable<any> {
+    return this.http.put(
+      `${this.apiUrl}/borrowings/${borrowingId}/return`,
+      body,
+    );
+  }
+
+  // Renew (prolonger) a borrowing
+  renewBook(borrowingId: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/borrowings/${borrowingId}/renew`, {});
+  }
+
+  // Save personal note on a borrowing
+  saveNote(borrowingId: string, notes: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/borrowings/${borrowingId}/note`, {
+      notes,
+    });
+  }
+
+  // Submit a review for a borrowing
+  submitReview(
+    borrowingId: string,
+    reviewData: {
+      rating: number;
+      title: string;
+      content: string;
+      tags: string[];
+    },
+  ): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/borrowings/${borrowingId}/review`,
+      reviewData,
+    );
   }
 
   // Get user borrowings
@@ -121,7 +155,7 @@ export class BookService {
     return this.http.get(`${this.apiUrl}/borrowings/my-borrowings`);
   }
 
-  // Get all borrowings
+  // Get all borrowings (admin)
   getAllBorrowings(params?: any): Observable<any> {
     let httpParams = new HttpParams();
     if (params) {
@@ -132,7 +166,7 @@ export class BookService {
     return this.http.get(`${this.apiUrl}/borrowings`, { params: httpParams });
   }
 
-  // Add review (parameters match backend: bookId, rating, title, content, tags)
+  // Add review via /api/reviews
   addReview(
     bookId: string,
     rating: number,

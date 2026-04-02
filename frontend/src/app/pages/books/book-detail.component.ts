@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common";
 import { ActivatedRoute, RouterModule } from "@angular/router";
 import { BookService } from "../../services/book.service";
 import { AuthService } from "../../services/auth.service";
+import { map } from "rxjs/operators";
 import {
   FormBuilder,
   FormGroup,
@@ -29,7 +30,6 @@ import {
         </a>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <!-- Book Cover -->
           <div class="md:col-span-1">
             <div
               class="aspect-video bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center mb-6"
@@ -42,14 +42,23 @@ import {
                 {{ book.availableCopies }}/{{ book.totalCopies }}
               </p>
 
-              <button
-                *ngIf="currentUser$ | async"
-                [disabled]="book.availableCopies === 0 || loading"
-                (click)="borrowBook()"
-                class="btn-primary w-full mb-2"
-              >
-                Emprunter
-              </button>
+              <ng-container *ngIf="isUser$ | async">
+                <button
+                  [disabled]="book.availableCopies === 0 || loading"
+                  (click)="borrowBook()"
+                  class="btn-primary w-full mb-2"
+                >
+                  Emprunter
+                </button>
+
+                <button
+                  *ngIf="book.availableCopies === 0"
+                  (click)="joinWaitingList()"
+                  class="btn-secondary w-full"
+                >
+                  Rejoindre la liste d'attente
+                </button>
+              </ng-container>
 
               <button
                 *ngIf="!(currentUser$ | async)"
@@ -59,17 +68,15 @@ import {
                 Se connecter pour emprunter
               </button>
 
-              <button
-                *ngIf="book.availableCopies === 0"
-                (click)="joinWaitingList()"
-                class="btn-secondary w-full"
+              <div
+                *ngIf="(currentUser$ | async) && !(isUser$ | async)"
+                class="p-3 bg-gray-50 border rounded-lg text-sm text-gray-500 italic text-center"
               >
-                Rejoindre la liste d'attente
-              </button>
+                Mode consultation (Admin)
+              </div>
             </div>
           </div>
 
-          <!-- Book Info -->
           <div class="md:col-span-2">
             <h1 class="text-4xl font-bold mb-2">{{ book.title }}</h1>
             <p class="text-xl text-gray-600 mb-6">par {{ book.author }}</p>
@@ -116,14 +123,13 @@ import {
               </p>
             </div>
 
-            <!-- Reviews -->
             <div>
               <h2 class="text-2xl font-bold mb-4">
                 Avis ({{ reviews.length }})
               </h2>
 
               <div
-                *ngIf="currentUser$ | async"
+                *ngIf="isUser$ | async"
                 class="bg-white rounded-lg shadow-md p-6 mb-6"
               >
                 <h3 class="font-bold mb-4">Laisser un avis</h3>
@@ -149,37 +155,20 @@ import {
                     </select>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-2"
-                      >Titre de l'avis</label
-                    >
+                    <label class="block text-sm font-medium mb-2">Titre</label>
                     <input
                       type="text"
                       formControlName="title"
-                      placeholder="Ex: Un excellent livre"
                       class="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-2"
-                      >Votre avis</label
-                    >
+                    <label class="block text-sm font-medium mb-2">Avis</label>
                     <textarea
                       formControlName="content"
-                      placeholder="Partagez votre avis..."
                       class="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       rows="4"
                     ></textarea>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium mb-2"
-                      >Tags (séparés par des virgules)</label
-                    >
-                    <input
-                      type="text"
-                      formControlName="tags"
-                      placeholder="Ex: fiction, aventure"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    />
                   </div>
                   <button
                     type="submit"
@@ -211,38 +200,15 @@ import {
                   <p class="text-yellow-500 mb-2">
                     {{ getRating(review.rating) }}
                   </p>
-                  <p class="text-gray-700 mb-3">{{ review.content }}</p>
-                  <div
-                    *ngIf="review.tags && review.tags.length > 0"
-                    class="flex flex-wrap gap-2"
-                  >
-                    <span
-                      *ngFor="let tag of review.tags"
-                      class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-                    >
-                      {{ tag }}
-                    </span>
-                  </div>
+                  <p class="text-gray-700">{{ review.content }}</p>
                 </div>
-              </div>
-
-              <div *ngIf="reviews.length === 0" class="text-center py-8">
-                <p class="text-gray-600">
-                  Aucun avis pour le moment. Soyez le premier à donner votre
-                  avis !
-                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <div *ngIf="!loading && !book" class="text-center py-12">
-        <p class="text-gray-600">Livre non trouvé</p>
-      </div>
     </div>
   `,
-  styles: [],
 })
 export class BookDetailComponent implements OnInit {
   book: any;
@@ -250,7 +216,11 @@ export class BookDetailComponent implements OnInit {
   loading = true;
   reviewLoading = false;
   reviewForm: FormGroup;
+
   currentUser$ = this.authService.user$;
+
+  // NOUVEAU : On vérifie si le rôle est strictement 'user'
+  isUser$ = this.authService.user$.pipe(map((user) => user?.role === "user"));
 
   constructor(
     private route: ActivatedRoute,
@@ -280,21 +250,14 @@ export class BookDetailComponent implements OnInit {
         this.loadReviews(id);
         this.loading = false;
       },
-      error: (error) => {
-        console.error("Erreur au chargement du livre", error);
-        this.loading = false;
-      },
+      error: () => (this.loading = false),
     });
   }
 
   loadReviews(bookId: string): void {
     this.bookService.getBookReviews(bookId).subscribe({
-      next: (response) => {
-        this.reviews = response.data || [];
-      },
-      error: (error) => {
-        console.error("Erreur au chargement des avis", error);
-      },
+      next: (response) => (this.reviews = response.data || []),
+      error: (error) => console.error(error),
     });
   }
 
@@ -309,12 +272,8 @@ export class BookDetailComponent implements OnInit {
         next: (response) => {
           if (response.success) {
             alert("Livre emprunté avec succès !");
-            const id = this.route.snapshot.paramMap.get("id");
-            if (id) this.loadBook(id);
+            this.loadBook(this.book._id);
           }
-        },
-        error: (error) => {
-          console.error("Erreur lors de l'emprunt", error);
         },
       });
   }
@@ -322,40 +281,29 @@ export class BookDetailComponent implements OnInit {
   joinWaitingList(): void {
     if (!this.book) return;
     this.bookService.joinWaitingList(this.book._id).subscribe({
-      next: (response) => {
-        alert("Vous avez rejoint la liste d'attente");
-      },
-      error: (error) => {
-        console.error("Erreur", error);
-      },
+      next: () => alert("Vous avez rejoint la liste d'attente"),
+      error: (err) => alert(err.error?.message || "Erreur"),
     });
   }
 
   submitReview(): void {
     if (this.reviewForm.invalid || !this.book) return;
-
     this.reviewLoading = true;
     const { rating, title, content, tags } = this.reviewForm.value;
-    const tagArray = tags
-      ? tags.split(",").map((tag: string) => tag.trim())
-      : [];
+    const tagArray = tags ? tags.split(",").map((t: string) => t.trim()) : [];
 
     this.bookService
       .addReview(this.book._id, rating, title, content, tagArray)
       .subscribe({
-        next: (response) => {
-          if (response.success) {
-            alert("Avis publié avec succès !");
+        next: (res) => {
+          if (res.success) {
+            alert("Avis publié !");
             this.reviewForm.reset();
-            const id = this.route.snapshot.paramMap.get("id");
-            if (id) this.loadReviews(id);
+            this.loadReviews(this.book._id);
           }
           this.reviewLoading = false;
         },
-        error: (error) => {
-          console.error("Erreur lors de l'envoi de l'avis", error);
-          this.reviewLoading = false;
-        },
+        error: () => (this.reviewLoading = false),
       });
   }
 
