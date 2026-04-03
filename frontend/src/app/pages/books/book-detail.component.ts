@@ -22,18 +22,13 @@ import {
       </div>
 
       <div *ngIf="!loading && book" class="fade-in">
-        <a
-          routerLink="/books"
-          class="text-blue-600 hover:text-blue-700 mb-6 inline-block"
-        >
+        <a routerLink="/books" class="text-blue-600 hover:text-blue-700 mb-6 inline-block">
           ← Retour aux livres
         </a>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div class="md:col-span-1">
-            <div
-              class="aspect-video bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center mb-6"
-            >
+            <div class="aspect-video bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center mb-6">
               <span class="text-6xl">📖</span>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 mb-6">
@@ -50,7 +45,6 @@ import {
                 >
                   Emprunter
                 </button>
-
                 <button
                   *ngIf="book.availableCopies === 0"
                   (click)="joinWaitingList()"
@@ -113,39 +107,27 @@ import {
                     {{ book.createdAt | date: "dd/MM/yyyy" }}
                   </p>
                 </div>
+                <div>
+                  <p class="text-sm text-gray-600">Langue</p>
+                  <p class="font-medium">{{ book.language || 'Non spécifiée' }}</p>
+                </div>
               </div>
             </div>
 
             <div class="mb-8">
               <h2 class="text-2xl font-bold mb-4">À propos du livre</h2>
-              <p class="text-gray-700 leading-relaxed">
-                {{ book.description }}
-              </p>
+              <p class="text-gray-700 leading-relaxed">{{ book.description }}</p>
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold mb-4">
-                Avis ({{ reviews.length }})
-              </h2>
+              <h2 class="text-2xl font-bold mb-4">Avis ({{ reviews.length }})</h2>
 
-              <div
-                *ngIf="isUser$ | async"
-                class="bg-white rounded-lg shadow-md p-6 mb-6"
-              >
+              <div *ngIf="isUser$ | async" class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h3 class="font-bold mb-4">Laisser un avis</h3>
-                <form
-                  [formGroup]="reviewForm"
-                  (ngSubmit)="submitReview()"
-                  class="space-y-4"
-                >
+                <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="space-y-4">
                   <div>
-                    <label class="block text-sm font-medium mb-2"
-                      >Note (1-5)</label
-                    >
-                    <select
-                      formControlName="rating"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    >
+                    <label class="block text-sm font-medium mb-2">Note (1-5)</label>
+                    <select formControlName="rating" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
                       <option value="">Sélectionner une note</option>
                       <option value="1">⭐ 1 - Mauvais</option>
                       <option value="2">⭐⭐ 2 - Passable</option>
@@ -156,50 +138,30 @@ import {
                   </div>
                   <div>
                     <label class="block text-sm font-medium mb-2">Titre</label>
-                    <input
-                      type="text"
-                      formControlName="title"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    />
+                    <input type="text" formControlName="title" class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
                   </div>
                   <div>
                     <label class="block text-sm font-medium mb-2">Avis</label>
-                    <textarea
-                      formControlName="content"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      rows="4"
-                    ></textarea>
+                    <textarea formControlName="content" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="4"></textarea>
                   </div>
-                  <button
-                    type="submit"
-                    [disabled]="reviewForm.invalid || reviewLoading"
-                    class="btn-primary"
-                  >
-                    {{ reviewLoading ? 'Envoi...' : 'Publier l'avis' }}
+                  <button type="submit" [disabled]="reviewForm.invalid || reviewLoading" class="btn-primary">
+                    {{ reviewLoading ? 'Envoi...' : "Publier l'avis" }}
                   </button>
                 </form>
               </div>
 
               <div *ngIf="reviews.length > 0" class="space-y-4">
-                <div
-                  *ngFor="let review of reviews"
-                  class="bg-white rounded-lg shadow-md p-4"
-                >
+                <div *ngFor="let review of reviews" class="bg-white rounded-lg shadow-md p-4">
                   <div class="flex justify-between items-start mb-2">
                     <div>
                       <p class="font-medium">{{ review.title }}</p>
                       <p class="text-sm text-gray-600">
-                        par {{ review.user?.firstName }}
-                        {{ review.user?.lastName }}
+                        par {{ review.user?.firstName }} {{ review.user?.lastName }}
                       </p>
                     </div>
-                    <p class="text-sm text-gray-500">
-                      {{ review.createdAt | date: "dd/MM/yyyy" }}
-                    </p>
+                    <p class="text-sm text-gray-500">{{ review.createdAt | date: "dd/MM/yyyy" }}</p>
                   </div>
-                  <p class="text-yellow-500 mb-2">
-                    {{ getRating(review.rating) }}
-                  </p>
+                  <p class="text-yellow-500 mb-2">{{ getRating(review.rating) }}</p>
                   <p class="text-gray-700">{{ review.content }}</p>
                 </div>
               </div>
@@ -218,8 +180,6 @@ export class BookDetailComponent implements OnInit {
   reviewForm: FormGroup;
 
   currentUser$ = this.authService.user$;
-
-  // NOUVEAU : On vérifie si le rôle est strictement 'user'
   isUser$ = this.authService.user$.pipe(map((user) => user?.role === "user"));
 
   constructor(
@@ -266,23 +226,28 @@ export class BookDetailComponent implements OnInit {
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 14);
 
-    this.bookService
-      .borrowBook(this.book._id, dueDate.toISOString())
-      .subscribe({
-        next: (response) => {
-          if (response.success) {
-            alert("Livre emprunté avec succès !");
-            this.loadBook(this.book._id);
-          }
-        },
-      });
+    this.bookService.borrowBook(this.book._id, dueDate.toISOString()).subscribe({
+      next: (response) => {
+        if (response.success) {
+          alert("Livre emprunté avec succès !");
+          this.loadBook(this.book._id);
+        }
+      },
+    });
   }
 
-  joinWaitingList(): void {
+ joinWaitingList(): void {
     if (!this.book) return;
     this.bookService.joinWaitingList(this.book._id).subscribe({
-      next: () => alert("Vous avez rejoint la liste d'attente"),
-      error: (err) => alert(err.error?.message || "Erreur"),
+      next: () => alert("Vous avez rejoint la liste d'attente !"),
+      error: (err) => {
+        const message = err.error?.error || "Erreur";
+        if (message === "Déjà dans la liste d'attente") {
+          alert("Vous êtes déjà dans la liste d'attente pour ce livre !");
+        } else {
+          alert(message);
+        }
+      }
     });
   }
 
@@ -292,19 +257,17 @@ export class BookDetailComponent implements OnInit {
     const { rating, title, content, tags } = this.reviewForm.value;
     const tagArray = tags ? tags.split(",").map((t: string) => t.trim()) : [];
 
-    this.bookService
-      .addReview(this.book._id, rating, title, content, tagArray)
-      .subscribe({
-        next: (res) => {
-          if (res.success) {
-            alert("Avis publié !");
-            this.reviewForm.reset();
-            this.loadReviews(this.book._id);
-          }
-          this.reviewLoading = false;
-        },
-        error: () => (this.reviewLoading = false),
-      });
+    this.bookService.addReview(this.book._id, rating, title, content, tagArray).subscribe({
+      next: (res) => {
+        if (res.success) {
+          alert("Avis publié !");
+          this.reviewForm.reset();
+          this.loadReviews(this.book._id);
+        }
+        this.reviewLoading = false;
+      },
+      error: () => (this.reviewLoading = false),
+    });
   }
 
   getRating(rating: number): string {

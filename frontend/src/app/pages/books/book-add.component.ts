@@ -16,73 +16,34 @@ import { BookService } from "../../services/book.service";
   template: `
     <div class="max-w-2xl mx-auto px-4 py-8">
       <div class="mb-8">
-        <a routerLink="/books" class="text-blue-600 hover:text-blue-700"
-          >← Retour aux livres</a
-        >
+        <a routerLink="/books" class="text-blue-600 hover:text-blue-700">← Retour aux livres</a>
         <h1 class="text-4xl font-bold mt-4">Ajouter un nouveau livre</h1>
       </div>
 
       <div class="bg-white rounded-lg shadow-md p-8">
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Titre *</label
-              >
-              <input
-                type="text"
-                formControlName="title"
-                placeholder="Titre du livre"
-                class="input-field"
-              />
-              <p
-                *ngIf="form.get('title')?.hasError('required')"
-                class="error-message"
-              >
-                Le titre est requis
-              </p>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Titre *</label>
+              <input type="text" formControlName="title" placeholder="Titre du livre" class="input-field" />
+              <p *ngIf="form.get('title')?.hasError('required')" class="error-message">Le titre est requis</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Auteur *</label
-              >
-              <input
-                type="text"
-                formControlName="author"
-                placeholder="Nom de l'auteur"
-                class="input-field"
-              />
-              <p
-                *ngIf="form.get('author')?.hasError('required')"
-                class="error-message"
-              >
-                L'auteur est requis
-              </p>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Auteur *</label>
+              <input type="text" formControlName="author" placeholder="Nom de l'auteur" class="input-field" />
+              <p *ngIf="form.get('author')?.hasError('required')" class="error-message">L'auteur est requis</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >ISBN *</label
-              >
-              <input
-                type="text"
-                formControlName="isbn"
-                placeholder="ISBN-13"
-                class="input-field"
-              />
-              <p
-                *ngIf="form.get('isbn')?.hasError('required')"
-                class="error-message"
-              >
-                L'ISBN est requis
-              </p>
+              <label class="block text-sm font-medium text-gray-700 mb-2">ISBN *</label>
+              <input type="text" formControlName="isbn" placeholder="ex: 978-3-16-148410-0" class="input-field" />
+              <p *ngIf="form.get('isbn')?.hasError('required')" class="error-message">L'ISBN est requis</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Genre *</label
-              >
+              <label class="block text-sm font-medium text-gray-700 mb-2">Genre *</label>
               <select formControlName="genres" class="input-field">
                 <option value="">Sélectionner un genre</option>
                 <option value="Fiction">Fiction</option>
@@ -114,84 +75,62 @@ import { BookService } from "../../services/book.service";
                 <option value="Business">Business</option>
                 <option value="Economics">Economics</option>
               </select>
-              <p
-                *ngIf="form.get('genres')?.hasError('required')"
-                class="error-message"
-              >
-                Le genre est requis
-              </p>
+              <p *ngIf="form.get('genres')?.hasError('required')" class="error-message">Le genre est requis</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Nombre total de copies *</label
-              >
-              <input
-                type="number"
-                formControlName="totalCopies"
-                placeholder="10"
-                class="input-field"
-              />
-              <p
-                *ngIf="form.get('totalCopies')?.hasError('required')"
-                class="error-message"
-              >
-                Le nombre de copies est requis
-              </p>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Langue *</label>
+             <select formControlName="language" class="input-field">
+  <option value="">Sélectionner une langue</option>
+  <option value="English">English</option>
+  <option value="French">Français</option>
+  <option value="mg">Malagasy</option>
+  <option value="Spanish">Español</option>
+  <option value="German">Deutsch</option>
+  <option value="Italian">Italian</option>
+  <option value="Portuguese">Português</option>
+  <option value="Arabic">العربية</option>
+  <option value="Chinese">中文</option>
+  <option value="Japanese">日本語</option>
+  <option value="Russian">Русский</option>
+  <option value="Hindi">हिन्दी</option>
+  <option value="Swahili">Kiswahili</option>
+  <option value="Dutch">Nederlands</option>
+  <option value="Korean">한국어</option>
+</select>
+              <p *ngIf="form.get('language')?.hasError('required')" class="error-message">La langue est requise</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Date de publication</label
-              >
-              <input
-                type="date"
-                formControlName="publishedDate"
-                class="input-field"
-              />
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nombre total de copies *</label>
+              <input type="number" formControlName="totalCopies" placeholder="10" class="input-field" />
+              <p *ngIf="form.get('totalCopies')?.hasError('required')" class="error-message">Le nombre de copies est requis</p>
             </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Date de publication</label>
+              <input type="date" formControlName="publishedDate" class="input-field" />
+            </div>
+
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
-              >Description *</label
-            >
-            <textarea
-              formControlName="description"
-              placeholder="Décrivez le livre..."
-              rows="6"
-              class="input-field"
-            ></textarea>
-            <p
-              *ngIf="form.get('description')?.hasError('required')"
-              class="error-message"
-            >
-              La description est requise
-            </p>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+            <textarea formControlName="description" placeholder="Décrivez le livre..." rows="6" class="input-field"></textarea>
+            <p *ngIf="form.get('description')?.hasError('required')" class="error-message">La description est requise</p>
           </div>
 
-          <div
-            *ngIf="error"
-            class="p-4 bg-red-50 border border-red-200 rounded-lg"
-          >
+          <div *ngIf="error" class="p-4 bg-red-50 border border-red-200 rounded-lg">
             <p class="text-red-600">{{ error }}</p>
           </div>
 
           <div class="flex gap-4">
-            <button
-              type="submit"
-              [disabled]="loading || form.invalid"
-              class="btn-primary flex-1"
-            >
+            <button type="submit" [disabled]="loading || form.invalid" class="btn-primary flex-1">
               {{ loading ? "Ajout en cours..." : "Ajouter le livre" }}
             </button>
-            <a
-              routerLink="/books"
-              class="btn-secondary flex-1 text-center block"
-            >
-              Annuler
-            </a>
+            <a routerLink="/books" class="btn-secondary flex-1 text-center block">Annuler</a>
           </div>
+
         </form>
       </div>
     </div>
@@ -213,6 +152,7 @@ export class BookAddComponent implements OnInit {
       author: ["", Validators.required],
       isbn: ["", Validators.required],
       genres: ["", Validators.required],
+      language: ["", Validators.required],
       totalCopies: [1, [Validators.required, Validators.min(1)]],
       publishedDate: [""],
       description: ["", Validators.required],
@@ -228,10 +168,23 @@ export class BookAddComponent implements OnInit {
     this.error = "";
 
     const formData = { ...this.form.value };
+
     // Convert genres single value to array
     if (formData.genres) {
       formData.genres = [formData.genres];
     }
+
+    // Convert publishedDate to publishedYear
+    if (formData.publishedDate) {
+      formData.publishedYear = new Date(formData.publishedDate).getFullYear();
+    }
+    delete formData.publishedDate;
+
+    // Set availableCopies = totalCopies
+    formData.availableCopies = formData.totalCopies;
+
+    // Esory ny language — tsy alefa any amin'ny backend
+    delete formData.language;
 
     this.bookService.createBook(formData).subscribe({
       next: (response) => {

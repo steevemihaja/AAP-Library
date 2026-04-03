@@ -46,7 +46,6 @@ export class BookService {
 
   constructor(private http: HttpClient) {}
 
-  // Get all books with filters
   getBooks(params?: any): Observable<BookResponse> {
     let httpParams = new HttpParams();
     if (params) {
@@ -61,34 +60,28 @@ export class BookService {
     });
   }
 
-  // Get book details
   getBook(id: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/books/${id}`);
   }
 
-  // Create new book
   createBook(bookData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/books`, bookData);
   }
 
-  // Update book
   updateBook(id: string, bookData: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/books/${id}`, bookData);
   }
 
-  // Delete book
   deleteBook(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/books/${id}`);
   }
 
-  // Search books
   searchBooks(query: string): Observable<BookResponse> {
     return this.http.get<BookResponse>(`${this.apiUrl}/books`, {
       params: { search: query },
     });
   }
 
-  // Get available genres
   getGenres(): Observable<any> {
     return this.getBooks().pipe(
       map((response) => {
@@ -103,7 +96,6 @@ export class BookService {
     );
   }
 
-  // Borrow a book
   borrowBook(bookId: string, dueDate: string): Observable<BorrowResponse> {
     return this.http.post<BorrowResponse>(`${this.apiUrl}/borrowings`, {
       bookId,
@@ -111,7 +103,6 @@ export class BookService {
     });
   }
 
-  // Return book (avec body optionnel pour condition et returnDate)
   returnBook(
     borrowingId: string,
     body: { condition?: string; returnDate?: string } = {},
@@ -122,19 +113,16 @@ export class BookService {
     );
   }
 
-  // Renew (prolonger) a borrowing
   renewBook(borrowingId: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/borrowings/${borrowingId}/renew`, {});
   }
 
-  // Save personal note on a borrowing
   saveNote(borrowingId: string, notes: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/borrowings/${borrowingId}/note`, {
       notes,
     });
   }
 
-  // Submit a review for a borrowing
   submitReview(
     borrowingId: string,
     reviewData: {
@@ -150,12 +138,10 @@ export class BookService {
     );
   }
 
-  // Get user borrowings
   getUserBorrowings(): Observable<any> {
     return this.http.get(`${this.apiUrl}/borrowings/my-borrowings`);
   }
 
-  // Get all borrowings (admin)
   getAllBorrowings(params?: any): Observable<any> {
     let httpParams = new HttpParams();
     if (params) {
@@ -166,7 +152,6 @@ export class BookService {
     return this.http.get(`${this.apiUrl}/borrowings`, { params: httpParams });
   }
 
-  // Add review via /api/reviews
   addReview(
     bookId: string,
     rating: number,
@@ -183,28 +168,25 @@ export class BookService {
     });
   }
 
-  // Get book reviews
   getBookReviews(bookId: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/reviews/book/${bookId}`);
   }
 
-  // Get my waiting list
+  // ✅ CORRECT
   getMyWaitingList(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/borrowings/waitinglist/my-list`);
+    return this.http.get(`${this.apiUrl}/waiting-list/my-list`);
   }
 
-  // Add to waiting list
   joinWaitingList(bookId: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/waiting-list`, { bookId });
   }
 
-  // Leave waiting list
   leaveWaitingList(bookId: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/waiting-list/${bookId}`);
   }
 
-  // Get user waiting lists
+  // ✅ CORRECT
   getUserWaitingLists(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/waiting-list/user/me`);
+    return this.http.get(`${this.apiUrl}/waiting-list/my-list`);
   }
 }

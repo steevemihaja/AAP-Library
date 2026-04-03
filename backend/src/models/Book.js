@@ -74,10 +74,15 @@ const bookSchema = new mongoose.Schema(
         "Publication year cannot be in the future",
       ],
     },
-    language: {
-      type: String,
-      default: "English",
-    },
+ language: {
+  type: String,
+  default: "English",
+  validate: {
+    validator: function() { return true; },
+    message: ''
+  }
+},
+
     pages: {
       type: Number,
       min: [1, "Pages must be at least 1"],

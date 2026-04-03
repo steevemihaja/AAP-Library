@@ -1,6 +1,4 @@
-import { defineConfig } from "@angular/cli/lib/config";
-
-export default defineConfig({
+export const environment = {
   production: false,
-  apiUrl: "http://localhost:5000/api",
-});
+  apiUrl: 'http://localhost:5000/api'
+};
